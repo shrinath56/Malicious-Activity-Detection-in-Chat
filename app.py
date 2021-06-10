@@ -10,26 +10,14 @@ with open('sent.pkl', 'rb') as pickle_in:
      unpickled_sent = pickle.load(pickle_in)
 
 #define Flask application instance with the name app
-# and passed the special variable __name__ that holds the name of the current Python module
-# __name__ means this current file. In this case, it will be main.py.
 app = Flask(__name__)
-'''Hence, with the Debug Mode on, 
-all the application code changes will get updated right away in the development stage, eliminating the need to restart the server.'''
 #debug=True allows possible Python errors to appear on the web page. This will help us trace the errors.
 app.debug = True
 app.config['SECRET_KEY'] = 'secret'
 app.config['SESSION_TYPE'] = 'filesystem'
 
-
-# To store session variables on server side in within flask_session folder to know when user has logged in and left the room.
-#Like Cookie, Session data is stored on client.
-#The Session is the time between the client logs in to the server and logs out of the server.
-'''A session with each client is assigned a Session ID. The Session data is stored on top of cookies and the server signs them cryptographically. 
-For this encryption, a Flask applicati
-on needs a defined SECRET_KEY.'''
 Session(app)
 
-#SocketIO is a cross-browser Javascript library that abstracts the client application from the actual transport protocol
 #SocketIO instance
 socketio = SocketIO(app, manage_session=False)
 # False because we don't want session to manage our sessions, we want to flask to manage sessions
@@ -37,17 +25,10 @@ socketio = SocketIO(app, manage_session=False)
 arr = []
 y_new = []
 
-''' @app.route is a decorator that turns a regular Python function into a Flask view function,
- which converts the function’s return value into an HTTP response to be displayed by an HTTP client, such as a web browser.
- this function will respond to web requests for the URL / i.e. main url'''
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
-'''GET- if someone tries to reload the page, information will not get lost ,
-most common method which can be used to send data in the unencrypted form to the server'''
-#POST - Used to send HTML form data to the server. The data received by the POST method is not cached by the server.
-# So essentially GET is used to retrieve remote data, and POST is used to insert/update remote data.
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
@@ -102,15 +83,6 @@ def left(message):
 
 if __name__ == '__main__':
     socketio.run(app)
-
-'''To start the development server we call the run() method of the Flask object.
-  socketio.run() function starts a Socket.IO enabled web server.'''
-
-
-# __name__ means this current file. In this case, it will be main.py.
-'''The condition __name__ == "__main__" ensures that the run() method is called only 
-when main.py is run as the main program. 
-The run() method will not be called if you import main.py in another Python module.'''
 '''socketio.run() function starts a Socket.IO enabled web server.'''
 
  
