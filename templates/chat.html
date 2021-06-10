@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Dominators Chat</title>
+    <!--Link to CSS -->
+    <link href="../static/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/style.css" rel="stylesheet" />
+
+    <!-- need to include jquery and socket.js scripts in our HTML file, before writing JS functions (to control functions)-->
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <script type="text/javascript" charset="utf-8">
+
+            //create socket connection
+            var socket;   
+            $(document).ready(function(){    // after document loaded, then this function
+                socket = io.connect('http://' + document.domain + ':' + location.port + '/chat');  
+                //If we want to host then change domain, currently its only domain as we are using localhost
+                socket.on('connect', function() {
+                    socket.emit('join', {});
+                });
+
+                //on receiving an event over channel 'status' and 'messgage' the respective callback function is executed.
+                socket.on('status', function(data) {
+                    $('#chat').val($('#chat').val() + '<' + data.msg + '>\n');   // to display session msg to message box of each user
+                    $('#chat').scrollTop($('#chat')[0].scrollHeight);   //move cursor to top
+                });
+                socket.on('message', function(data) {
+                    $('#chat').val($('#chat').val() + data.msg + '\n');     // to display all chat msg -||-
+                    $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                });
+                $('#send').click(function(e) {    // event handler for send button
+                        text = $('#text').val();
+                        $('#text').val('');    // to delete the existing text from input
+                        socket.emit('text', {msg: text});
+                });
+            });
+            function leave_room() {
+                socket.emit('left', {}, function() {
+                    socket.disconnect();
+                    // go back to the login page
+                    window.location.href = "{{ url_for('index') }}";
+                });
+            }
+        </script>
+    
+  </head>
+
+  <body class="text-center">
+    
+    <div class="chatwindow">
+      <h2 >Dominators Chat</h2>
+      <h2>Room : {{session['room']}}</h2><br>
+      <textarea id="chat" cols="70" rows="10" placeholder="No messages yet. Start one..."></textarea><br /><br />
+      <input type="text" id="text" size="60" placeholder="Enter your message here" />
+      <button type="button" id="send" class="btn btn-success">SEND</button><br /><br/>
+      <center><button type="button" class="btn btn-danger" onclick=leave_room()>Leave this Chat</button></center>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+       {% if messages %}
+         {% for category, message in messages %}
+           <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              <span>{{ message }}</span>
+              <span aria-hidden="true">×</span>
+    </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+  </body>
+</html>
